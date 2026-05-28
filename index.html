@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#8B5CF6">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CME Conteúdo">
+  <meta name="description" content="App de geração de conteúdo da Casa da Mãe Econômica">
+  <title>CME Conteúdo</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    /* ===================== RESET & VARS ===================== */
+    *, *::before, *::after {
+      margin: 0; padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :root {
+      --primary:       #8B5CF6;
+      --primary-dark:  #7C3AED;
+      --primary-light: #EDE9FE;
+      --pink:          #F5E6FF;
+      --green:         #E2F5D8;
+      --teal:          #B2D8D3;
+      --text:          #1F2937;
+      --text-mid:      #4B5563;
+      --text-light:    #9CA3AF;
+      --bg:            #F8F7FF;
+      --white:         #FFFFFF;
+      --shadow:        0 2px 12px rgba(139,92,246,0.10);
+      --radius:        16px;
+      --font-script:   'Dancing Script', cursive;
+      --font:          'Nunito', sans-serif;
+    }
+
+    html, body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ===================== SCREENS ===================== */
+    .screen {
+      display: none;
+      min-height: 100vh;
+      flex-direction: column;
+    }
+    .screen.active { display: flex; }
+
+    /* ===================== TOP BAR ===================== */
+    .topbar {
+      background: var(--primary);
+      color: #fff;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.18);
+    }
+    .topbar-back {
+      background: none; border: none; color: #fff;
+      font-size: 24px; cursor: pointer; padding: 2px 6px 2px 0;
+      line-height: 1; display: flex; align-items: center;
+    }
+    .topbar-title { font-size: 17px; font-weight: 700; flex: 1; }
+    .topbar-icon  { background: none; border: none; color: #fff; font-size: 22px; cursor: pointer; padding: 2px; }
+
+    /* ===================== HOME ===================== */
+    .home-topbar-logo {
+      font-family: var(--font-script);
+      font-size: 22px; font-weight: 700; flex: 1;
+    }
+
+    .home-body { padding: 20px 16px 32px; flex: 1; overflow-y: auto; }
+
+    .home-greeting { font-size: 13px; color: var(--text-light); margin-bottom: 2px; }
+    .home-headline { font-size: 22px; font-weight: 800; color: var(--text); margin-bottom: 22px; }
+
+    .section-label {
+      font-size: 11px; font-weight: 700;
+      color: var(--text-light); text-transform: uppercase;
+      letter-spacing: 0.9px; margin-bottom: 10px;
+    }
+
+    .feature-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 10px; margin-bottom: 22px;
+    }
+
+    .feature-card {
+      background: var(--white); border-radius: var(--radius);
+      padding: 16px 14px; cursor: pointer;
+      box-shadow: var(--shadow); border: 2px solid transparent;
+      transition: transform 0.15s, border-color 0.15s;
+      display: flex; flex-direction: column; gap: 7px; min-height: 104px;
+    }
+    .feature-card:active { transform: scale(0.96); border-color: var(--primary); }
+    .feature-card.coming-soon { opacity: 0.55; cursor: not-allowed; }
+    .feature-icon { font-size: 28px; }
+    .feature-name { font-size: 13px; font-weight: 700; color: var(--text); line-height: 1.25; }
+    .feature-badge {
+      font-size: 10px; background: var(--primary-light);
+      color: var(--primary); border-radius: 8px;
+      padding: 2px 8px; font-weight: 700; width: fit-content;
+    }
+    .feature-badge.soon { background: #FEF3C7; color: #B45309; }
+
+    /* ===================== FORM ===================== */
+    .form-body { padding: 20px 16px 40px; flex: 1; overflow-y: auto; }
+    .form-desc {
+      font-size: 13px; color: var(--text-mid);
+      line-height: 1.55; margin-bottom: 22px;
+      background: var(--primary-light); border-radius: 12px;
+      padding: 12px 14px;
+    }
+
+    .form-group { margin-bottom: 14px; }
+    .form-label { font-size: 13px; font-weight: 700; color: var(--text); display: block; margin-bottom: 5px; }
+    .form-hint  { font-size: 11px; color: var(--text-light); margin-bottom: 5px; display: block; }
+
+    .form-input, .form-select, .form-textarea {
+      width: 100%; padding: 12px 14px;
+      border: 2px solid #E5E7EB; border-radius: 12px;
+      font-family: var(--font); font-size: 14px;
+      color: var(--text); background: var(--white);
+      outline: none; transition: border-color 0.2s;
+      appearance: none; -webkit-appearance: none;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--primary);
+    }
+    .form-textarea { resize: vertical; min-height: 82px; }
+    .form-select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236B7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 12px center;
+      background-size: 18px; padding-right: 38px;
+    }
+
+    .btn-primary {
+      width: 100%; padding: 16px;
+      background: var(--primary); color: #fff;
+      border: none; border-radius: 14px;
+      font-family: var(--font); font-size: 16px;
+      font-weight: 800; cursor: pointer;
+      display: flex; align-items: center;
+      justify-content: center; gap: 8px;
+      margin-top: 10px; transition: all 0.18s;
+    }
+    .btn-primary:active { transform: scale(0.97); background: var(--primary-dark); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* ===================== LOADING ===================== */
+    #screen-loading {
+      align-items: center; justify-content: center;
+      background: var(--bg);
+    }
+    .loading-inner { text-align: center; padding: 40px 24px; }
+    .spinner {
+      width: 60px; height: 60px;
+      border: 5px solid var(--primary-light);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 0 auto 22px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-title  { font-size: 19px; font-weight: 800; color: var(--text); margin-bottom: 6px; }
+    .loading-sub    { font-size: 13px; color: var(--text-light); }
+
+    /* ===================== RESULT ===================== */
+    .result-body { padding: 14px 14px 100px; flex: 1; overflow-y: auto; }
+
+    .result-sticky {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      display: flex; gap: 10px; padding: 12px 14px;
+      background: var(--white);
+      box-shadow: 0 -2px 12px rgba(0,0,0,0.08);
+      z-index: 100;
+    }
+    .btn-novo {
+      flex: 1; padding: 13px;
+      background: var(--primary-light); color: var(--primary);
+      border: none; border-radius: 14px;
+      font-family: var(--font); font-size: 15px;
+      font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .btn-pdf {
+      flex: 1; padding: 13px;
+      background: var(--primary); color: #fff;
+      border: none; border-radius: 14px;
+      font-family: var(--font); font-size: 15px;
+      font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+
+    /* ===================== ROTEIRO TEMPLATE ===================== */
+    .roteiro-card {
+      background: var(--white); border-radius: var(--radius);
+      overflow: hidden; box-shadow: var(--shadow);
+      margin-bottom: 14px;
+    }
+    .roteiro-header {
+      padding: 18px 18px 10px;
+      border-bottom: 1px solid #F3F4F6;
+    }
+    .roteiro-title-script {
+      font-family: var(--font-script);
+      font-size: 26px; color: var(--text);
+      line-height: 1.2; display: block;
+    }
+    .roteiro-meta {
+      display: flex; gap: 12px; margin-top: 4px;
+    }
+    .roteiro-chip {
+      font-size: 11px; font-weight: 600;
+      background: var(--primary-light);
+      color: var(--primary);
+      border-radius: 8px; padding: 2px 8px;
+    }
+
+    /* Grid sections */
+    .roteiro-section {
+      display: grid;
+      grid-template-columns: 3fr 2fr;
+      gap: 3px;
+    }
+    .roteiro-section + .roteiro-section { margin-top: 3px; }
+
+    .r-block {
+      padding: 14px 14px 16px;
+      min-height: 90px;
+    }
+    .r-block.pink  { background: var(--pink); }
+    .r-block.green { background: var(--green); }
+    .r-block.teal  { background: var(--teal); }
+
+    .r-label {
+      display: inline-block;
+      background: rgba(255,255,255,0.85);
+      border-radius: 6px; padding: 3px 8px;
+      font-size: 11px; font-weight: 700;
+      color: var(--text); margin-bottom: 8px;
+    }
+    .r-label + .r-label { margin-left: 4px; }
+
+    .r-text {
+      font-size: 13px; line-height: 1.65;
+      color: var(--text);
+    }
+    .r-subblock { margin-bottom: 12px; }
+    .r-subblock:last-child { margin-bottom: 0; }
+
+    .r-notes-label {
+      font-size: 10px; color: rgba(0,0,0,0.3);
+      text-transform: uppercase; letter-spacing: 0.5px;
+      font-weight: 600; margin-bottom: 6px; display: block;
+    }
+    .r-notes-lines { display: flex; flex-direction: column; gap: 8px; }
+    .r-notes-line  {
+      height: 1px; background: rgba(0,0,0,0.12);
+      border-radius: 2px;
+    }
+
+    .roteiro-dicas {
+      padding: 14px 16px;
+      background: #F9F7FF;
+      border-top: 1px solid #EDE9FE;
+    }
+    .roteiro-dicas-title {
+      font-size: 12px; font-weight: 700;
+      color: var(--primary); margin-bottom: 6px;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .roteiro-dicas-text {
+      font-size: 12px; line-height: 1.6; color: var(--text-mid);
+    }
+
+    /* ===================== GANCHOS TEMPLATE ===================== */
+    .ganchos-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+    .gancho-card {
+      background: var(--white); border-radius: 14px;
+      padding: 16px; box-shadow: var(--shadow);
+      border-left: 4px solid var(--primary);
+    }
+    .gancho-tipo {
+      font-size: 11px; font-weight: 700;
+      color: var(--primary); text-transform: uppercase;
+      letter-spacing: 0.5px; margin-bottom: 7px;
+    }
+    .gancho-texto { font-size: 15px; font-weight: 600; color: var(--text); line-height: 1.45; }
+
+    /* ===================== CAPAS TEMPLATE ===================== */
+    .capas-card {
+      background: var(--white); border-radius: 14px;
+      overflow: hidden; box-shadow: var(--shadow); margin-bottom: 10px;
+    }
+    .capa-item {
+      padding: 16px 18px;
+      border-bottom: 1px solid #F3F4F6;
+    }
+    .capa-item:last-child { border-bottom: none; }
+    .capa-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .capa-num {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: var(--primary-light); color: var(--primary);
+      font-size: 12px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .capa-tipo-badge {
+      font-size: 10px; font-weight: 700;
+      color: var(--text-light); text-transform: uppercase; letter-spacing: 0.4px;
+    }
+    .capa-titulo {
+      font-size: 18px; font-weight: 800; color: var(--text);
+      line-height: 1.25; margin-bottom: 4px;
+    }
+    .capa-sub { font-size: 13px; color: var(--text-mid); }
+
+    .capas-dica {
+      background: #FEF3C7; border-radius: 12px;
+      padding: 12px 14px; font-size: 12px;
+      color: #92400E; line-height: 1.55;
+      margin-bottom: 10px;
+    }
+
+    /* ===================== SETTINGS ===================== */
+    .settings-body { padding: 20px 16px 40px; flex: 1; overflow-y: auto; }
+    .settings-section { margin-bottom: 24px; }
+    .settings-section-title {
+      font-size: 14px; font-weight: 700;
+      color: var(--text); margin-bottom: 12px;
+    }
+    .api-info {
+      background: #FFFBEB; border-radius: 12px;
+      padding: 12px 14px; font-size: 12px;
+      color: #92400E; line-height: 1.55; margin-bottom: 12px;
+    }
+    .api-saved {
+      background: #D1FAE5; border-radius: 12px;
+      padding: 12px 14px; font-size: 13px;
+      color: #065F46; display: flex;
+      align-items: center; gap: 8px; margin-bottom: 12px;
+    }
+    .about-text {
+      font-size: 13px; color: var(--text-mid);
+      line-height: 1.65;
+    }
+
+    /* ===================== ERROR BOX ===================== */
+    .error-box {
+      background: #FEE2E2; border-radius: 12px;
+      padding: 14px; font-size: 13px;
+      color: #991B1B; margin-bottom: 14px;
+      line-height: 1.5;
+    }
+
+    /* ===================== SCROLLBAR ===================== */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--primary-light); border-radius: 4px; }
+
+    /* ===================== PRINT STYLES ===================== */
+    @media print {
+      * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+      body { background: white !important; margin: 0 !important; }
+      .screen  { display: none !important; }
+      #print-area { display: block !important; padding: 16px; }
+
+      .roteiro-card { box-shadow: none; border: 1px solid #ddd; break-inside: avoid; }
+      .r-block.pink  { background: #F5E6FF !important; }
+      .r-block.green { background: #E2F5D8 !important; }
+      .r-block.teal  { background: #B2D8D3 !important; }
+      .roteiro-dicas { background: #F9F7FF !important; }
+
+      .ganchos-list, .gancho-card,
+      .capas-card, .capa-item { break-inside: avoid; }
+      .capas-dica { background: #FEF3C7 !important; }
+
+      .result-sticky, .topbar { display: none !important; }
+      .no-print { display: none !important; }
+    }
+
+    #print-area { display: none; }
+  </style>
+</head>
+<body>
+
+<!-- =========================================================== -->
+<!--  PRINT AREA                                                   -->
+<!-- =========================================================== -->
+<div id="print-area"></div>
+
+<!-- =========================================================== -->
+<!--  HOME                                                         -->
+<!-- =========================================================== -->
+<div id="screen-home" class="screen active">
+  <div class="topbar">
+    <span class="home-topbar-logo">CME Conteúdo ✨</span>
+    <button class="topbar-icon" onclick="navigate('settings')" title="Configurações">⚙️</button>
+  </div>
+  <div class="home-body">
+    <p class="home-greeting">Olá, Carol e Mô! 👋</p>
+    <p class="home-headline">O que vamos criar hoje?</p>
+
+    <p class="section-label">Roteiros</p>
+    <div class="feature-grid">
+      <div class="feature-card" onclick="openFeature('magnetico')">
+        <div class="feature-icon">🎬</div>
+        <div class="feature-name">Roteiro Magnético</div>
+        <div class="feature-badge">7 Blocos</div>
+      </div>
+      <div class="feature-card" onclick="openFeature('storytelling')">
+        <div class="feature-icon">📖</div>
+        <div class="feature-name">Roteiro Storytelling</div>
+        <div class="feature-badge">Produto</div>
+      </div>
+    </div>
+
+    <p class="section-label">Criação</p>
+    <div class="feature-grid">
+      <div class="feature-card" onclick="openFeature('ganchos')">
+        <div class="feature-icon">🪝</div>
+        <div class="feature-name">Ganchos</div>
+        <div class="feature-badge">5 opções</div>
+      </div>
+      <div class="feature-card" onclick="openFeature('capas')">
+        <div class="feature-icon">🖼️</div>
+        <div class="feature-name">Capas</div>
+        <div class="feature-badge">5 títulos</div>
+      </div>
+    </div>
+
+    <p class="section-label">Em breve</p>
+    <div class="feature-grid">
+      <div class="feature-card coming-soon" onclick="showComingSoon()">
+        <div class="feature-icon">📅</div>
+        <div class="feature-name">Kit TikTok 5 Vídeos</div>
+        <div class="feature-badge soon">Em breve</div>
+      </div>
+      <div class="feature-card coming-soon" onclick="showComingSoon()">
+        <div class="feature-icon">💬</div>
+        <div class="feature-name">Legenda</div>
+        <div class="feature-badge soon">Em breve</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =========================================================== -->
+<!--  FORM                                                         -->
+<!-- =========================================================== -->
+<div id="screen-form" class="screen">
+  <div class="topbar">
+    <button class="topbar-back" onclick="goBack()">&#8592;</button>
+    <span class="topbar-title" id="form-title"></span>
+  </div>
+  <div class="form-body" id="form-body"></div>
+</div>
+
+<!-- =========================================================== -->
+<!--  LOADING                                                      -->
+<!-- =========================================================== -->
+<div id="screen-loading" class="screen">
+  <div class="loading-inner">
+    <div class="spinner"></div>
+    <div class="loading-title">Gerando conteúdo...</div>
+    <div class="loading-sub">A IA está trabalhando para você ✨</div>
+  </div>
+</div>
+
+<!-- =========================================================== -->
+<!--  RESULT                                                       -->
+<!-- =========================================================== -->
+<div id="screen-result" class="screen">
+  <div class="topbar">
+    <button class="topbar-back" onclick="goBack()">&#8592;</button>
+    <span class="topbar-title" id="result-title"></span>
+  </div>
+  <div class="result-body" id="result-body"></div>
+  <div class="result-sticky">
+    <button class="btn-novo" onclick="goBack()">🔄 Novo</button>
+    <button class="btn-pdf"  onclick="downloadPDF()">📄 Salvar PDF</button>
+  </div>
+</div>
+
+<!-- =========================================================== -->
+<!--  SETTINGS                                                     -->
+<!-- =========================================================== -->
+<div id="screen-settings" class="screen">
+  <div class="topbar">
+    <button class="topbar-back" onclick="goBack()">&#8592;</button>
+    <span class="topbar-title">Configurações</span>
+  </div>
+  <div class="settings-body">
+    <div class="settings-section">
+      <p class="settings-section-title">🔑 Chave da API Anthropic</p>
+      <div class="api-info">
+        💡 Sua chave fica salva <strong>somente no seu celular</strong>. Ninguém mais acessa.<br><br>
+        Para obter uma chave gratuita (com créditos iniciais), acesse:<br>
+        <strong>console.anthropic.com → API Keys → Create Key</strong>
+      </div>
+      <div id="api-key-status"></div>
+      <div class="form-group">
+        <label class="form-label">Cole sua API Key:</label>
+        <input type="password" class="form-input" id="api-key-input" placeholder="sk-ant-...">
+      </div>
+      <button class="btn-primary" onclick="saveApiKey()">💾 Salvar Chave</button>
+    </div>
+
+    <div class="settings-section">
+      <p class="settings-section-title">📱 Sobre o App</p>
+      <p class="about-text">
+        <strong>CME Conteúdo v1.0</strong><br>
+        App de geração de conteúdo da Casa da Mãe Econômica.<br><br>
+        Desenvolvido com ❤️ para Carol e Mô.<br><br>
+        <strong>Modelo de IA:</strong> Claude Haiku (rápido e econômico)<br>
+        <strong>Custo médio por geração:</strong> ~R$ 0,01 a R$ 0,03
+      </p>
+    </div>
+
+    <div class="settings-section">
+      <p class="settings-section-title">🗑️ Dados</p>
+      <button class="btn-primary" style="background:#EF4444;" onclick="clearData()">
+        Apagar chave API
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- =========================================================== -->
+<!--  JAVASCRIPT                                                   -->
+<!-- =========================================================== -->
+<script>
+
+/* ===================== NAVIGATION ===================== */
+let screenStack = ['home'];
+let currentFeature = null;
+let lastResultHTML = '';
+
+function navigate(id) {
+  screenStack.push(id);
+  _show(id);
+}
+
+function goBack() {
+  screenStack.pop();
+  const prev = screenStack[screenStack.length - 1] || 'home';
+  _show(prev);
+}
+
+function _show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function showComingSoon() {
+  alert('🚧 Em breve!\n\nEssa função está sendo criada e chegará em breve no app. 😊');
+}
+
+
+/* ===================== FEATURE CONFIGS ===================== */
+const FEATURES = {
+  magnetico: {
+    title: '🎬 Roteiro Magnético',
+    desc:  'Roteiro de atração com 7 blocos — storytelling pessoal, tensão real e revelação de mecanismo.',
+    fields: [
+      { id: 'produto', label: '🛍️ Produto a promover', type: 'text',
+        placeholder: 'Ex: aspirador robô, kit skincare, curso online... (ou deixe em branco se não for vender)' },
+      { id: 'duracao', label: '⏱️ Duração do vídeo', type: 'select',
+        options: ['30 segundos', '40 segundos', '60 segundos'] },
+      { id: 'objetivo', label: 'Objetivo do vídeo', type: 'select',
+        options: ['Atração — ganhar novos seguidores', 'Conversão — vender ou direcionar para link', 'Qualificação — engajar quem já segue'] },
+      { id: 'nicho', label: 'Nicho / Tema', type: 'text',
+        placeholder: 'Ex: economia doméstica, maternidade, moda...' },
+      { id: 'situacao', label: 'Situação real (o que aconteceu?)', type: 'textarea',
+        placeholder: 'Conte o que você viveu, viu ou que o seu público frequentemente passa...' },
+      { id: 'mecanismo', label: 'O que você sabe que a maioria não sabe?', type: 'textarea',
+        placeholder: 'A dica, regra ou conhecimento insider que você tem...' },
+      { id: 'tensao', label: 'Momento de tensão / constrangimento', type: 'text',
+        placeholder: 'O erro, surpresa ou situação incômoda que cria o gancho...' },
+    ]
+  },
+  storytelling: {
+    title: '📖 Roteiro Storytelling',
+    desc:  'Roteiro persuasivo com gancho baseado em fato real e produto como solução natural.',
+    fields: [
+      { id: 'produto',    label: '🛍️ Produto a promover', type: 'text',     placeholder: 'Nome do produto...' },
+      { id: 'duracao',    label: '⏱️ Duração do vídeo',   type: 'select',
+        options: ['30 segundos', '40 segundos', '60 segundos', '90 segundos'] },
+      { id: 'preco',      label: 'Preço do produto',   type: 'text',     placeholder: 'Ex: R$ 49,90' },
+      { id: 'beneficio',  label: 'Problema que o produto resolve', type: 'textarea',
+        placeholder: 'Qual dor principal o produto elimina?' },
+      { id: 'noticia',    label: 'Caso ou notícia real para o gancho', type: 'textarea',
+        placeholder: 'Descreva um caso real — ou deixe em branco e a IA sugere um compatível.' },
+      { id: 'estatistica',label: 'Estatística ou dado de impacto', type: 'text',
+        placeholder: 'Ex: "1 em cada 3 famílias..." — ou deixe em branco.' },
+      { id: 'tom',        label: 'Tom do vídeo', type: 'select',
+        options: ['Dramático e urgente', 'Emocional e empático', 'Informativo e sério', 'Leve e acessível'] },
+      { id: 'cta_acao',   label: 'Ação desejada no CTA', type: 'text',
+        placeholder: 'Ex: clicar no link da bio, comentar "quero", seguir o perfil...' },
+    ]
+  },
+  ganchos: {
+    title: '🪝 Ganchos',
+    desc:  'Gera 5 ganchos com abordagens diferentes para o mesmo tema.',
+    fields: [
+      { id: 'tema',    label: 'Tema do vídeo', type: 'text', placeholder: 'Sobre o que é o vídeo?' },
+      { id: 'nicho',   label: 'Nicho / Contexto', type: 'text',
+        placeholder: 'Ex: mãe econômica, empreendedora, viagens baratas...' },
+      { id: 'objetivo', label: 'Objetivo', type: 'select',
+        options: ['Atrair novos seguidores', 'Vender um produto', 'Gerar engajamento', 'Educar a audiência'] },
+      { id: 'emocao',  label: 'Emoção alvo', type: 'select',
+        options: ['Curiosidade', 'Urgência / Medo de perder', 'Empatia / Identificação', 'Surpresa / Choque'] },
+    ]
+  },
+  capas: {
+    title: '🖼️ Capas',
+    desc:  'Gera 5 opções de títulos e textos para capa de vídeos — prontos para usar no CapCut, Canva, etc.',
+    fields: [
+      { id: 'tema',      label: 'Tema do vídeo', type: 'text',
+        placeholder: 'O que o vídeo ensina ou mostra?' },
+      { id: 'nicho',     label: 'Nicho', type: 'text',
+        placeholder: 'Ex: economia doméstica, família, compras, beleza...' },
+      { id: 'tipo',      label: 'Tipo de apelo preferido', type: 'select',
+        options: ['Curiosidade (o que você não sabia)', 'Benefício direto (o que a pessoa ganha)', 'Urgência (não pode perder)', 'Polêmica (vai contra o senso comum)'] },
+      { id: 'plataforma',label: 'Plataforma', type: 'select',
+        options: ['TikTok', 'Reels (Instagram)', 'YouTube Shorts', 'Todas'] },
+    ]
+  }
+};
+
+
+/* ===================== OPEN FEATURE ===================== */
+function openFeature(id) {
+  const feat = FEATURES[id];
+  if (!feat) return;
+  currentFeature = id;
+
+  document.getElementById('form-title').textContent = feat.title;
+
+  let html = `<div class="form-desc">${feat.desc}</div>`;
+
+  feat.fields.forEach(f => {
+    html += `<div class="form-group"><label class="form-label">${f.label}</label>`;
+    if (f.type === 'select') {
+      html += `<select class="form-select" id="f-${f.id}">`;
+      f.options.forEach(o => html += `<option value="${o}">${o}</option>`);
+      html += `</select>`;
+    } else if (f.type === 'textarea') {
+      html += `<textarea class="form-textarea" id="f-${f.id}" placeholder="${f.placeholder||''}"></textarea>`;
+    } else {
+      html += `<input type="text" class="form-input" id="f-${f.id}" placeholder="${f.placeholder||''}">`;
+    }
+    html += `</div>`;
+  });
+
+  html += `<button class="btn-primary" id="btn-gerar" onclick="gerarConteudo()">✨ Gerar com IA</button><div style="height:32px"></div>`;
+
+  document.getElementById('form-body').innerHTML = html;
+  navigate('form');
+}
+
+
+/* ===================== COLLECT DATA ===================== */
+function coletarDados() {
+  const feat = FEATURES[currentFeature];
+  const d = {};
+  feat.fields.forEach(f => {
+    const el = document.getElementById('f-' + f.id);
+    if (el) d[f.id] = el.value.trim();
+  });
+  return d;
+}
+
+
+/* ===================== PROMPTS ===================== */
+function getSystemPrompt(id) {
+  const p = {
+    magnetico: `Você é especialista em roteiros magnéticos de Reels.
+
+Crie um Roteiro de Atração com 7 blocos que usa tensão real, revelação de mecanismo insider e quebra meta-narrativa. O texto deve parecer um relato pessoal espontâneo, não um script.
+
+Regras:
+- Abertura: cria constrangimento, surpresa ou incômodo — não vende
+- Suspensão: cria antecipação com "Mas antes de te contar... deixa eu te dar o contexto"
+- Contexto: detalhes concretos e específicos (preço, lugar, modelo, o que a pessoa disse)
+- Revelação: conhecimento insider mostrado com naturalidade, sem arrogância
+- Quebra meta-narrativa: humaniza — "até quem trabalha com isso pode ser pego de surpresa"
+- Regra prática: lição concreta e memorável
+- CTA: adaptado ao objetivo — sobre o que o espectador GANHA
+
+Calibre o tamanho de cada bloco à duração: 30s = 1-2 frases por bloco; 60s = até 3-4 frases.
+
+RETORNE SOMENTE um JSON válido, sem markdown, sem texto extra:
+{"titulo":"Roteiro: [tema breve]","objetivo":"[objetivo]","duracao":"[duração]","produto":"[produto ou vazio]","abertura_tensao":"[texto]","suspensao_intencional":"[texto]","contexto_crivel":"[texto]","revelacao_mecanismo":"[texto]","quebra_meta_narrativa":"[texto]","regra_pratica":"[texto]","cta":"[texto]","dicas_gravacao":"[dicas práticas de gravação para este roteiro específico]"}`,
+
+    storytelling: `Você é especialista em roteiros persuasivos de Reels baseados em storytelling.
+
+Formato: Gancho (fato real impactante) → Ponte (estatísticas que generalizam) → Virada (produto como solução natural) → Desenvolvimento (como resolve, diferenciais) → CTA.
+
+Regras de qualidade:
+- NUNCA comece o gancho com "Você sabia que..." ou perguntas genéricas
+- SEMPRE abra com o fato, não com a conclusão
+- A virada deve soar como descoberta, não propaganda
+- Linguagem simples, coloquial, como falando para um amigo
+- Total: 200-350 palavras
+- Evite superlativos vazios ("incrível", "revolucionário")
+
+RETORNE SOMENTE um JSON válido, sem markdown, sem texto extra:
+{"titulo":"Roteiro: [produto em 3-5 palavras]","produto":"[nome do produto]","duracao":"[duração escolhida]","gancho":"[fato real vívido, máx 5 frases]","ponte":"[estatísticas que generalizam o problema]","virada":"[revelação natural do produto como solução]","desenvolvimento":"[como funciona, por que é acessível, dado de reforço]","cta":"[chamada direta e clara]","gancho_alternativo":"[versão alternativa com abordagem diferente]","legenda_sugerida":"[legenda curta de 2-3 linhas para o post]"}`,
+
+    ganchos: `Você é especialista em criar ganchos virais para vídeos curtos (Reels, TikTok, Shorts).
+
+Um bom gancho prende em menos de 3 segundos, cria curiosidade ou emoção imediata, e faz a pessoa querer assistir até o fim.
+
+Crie 5 ganchos com abordagens completamente diferentes, cada um explorando um ângulo distinto.
+
+RETORNE SOMENTE um JSON válido, sem markdown:
+{"ganchos":[{"tipo":"Emocional","texto":"[gancho que gera identificação imediata]"},{"tipo":"Estatística","texto":"[dado surpreendente que muda a perspectiva]"},{"tipo":"Pergunta Provocativa","texto":"[pergunta que desafia uma crença comum]"},{"tipo":"Afirmação Polêmica","texto":"[afirmação que vai contra o senso comum]"},{"tipo":"Revelação","texto":"[promessa de revelar algo que a maioria não sabe]"}]}`,
+
+    capas: `Você é especialista em criar textos de capa para vídeos curtos.
+
+Um bom texto de capa: é curto (máx 6-8 palavras no título), para o scroll imediatamente, comunica o benefício em segundos, funciona sem som.
+
+Crie 5 opções com apelos diferentes. Os títulos devem ser impactantes — podem usar CAIXA ALTA, números, perguntas ou frases incompletas que criam curiosidade.
+
+RETORNE SOMENTE um JSON válido, sem markdown:
+{"opcoes":[{"numero":1,"tipo":"Curiosidade","titulo":"[título impactante]","subtitulo":"[complemento — 1 linha]"},{"numero":2,"tipo":"Benefício","titulo":"[título]","subtitulo":"[complemento]"},{"numero":3,"tipo":"Urgência","titulo":"[título]","subtitulo":"[complemento]"},{"numero":4,"tipo":"Polêmica","titulo":"[título]","subtitulo":"[complemento]"},{"numero":5,"tipo":"Identidade","titulo":"[título que gera identificação]","subtitulo":"[complemento]"}],"dica":"[dica de design: fonte, cor, posicionamento ideal para a plataforma]"}`
+  };
+  return p[id] || '';
+}
+
+function getUserMessage(id, d) {
+  const m = {
+    magnetico: `Crie o roteiro com estes dados:
+Produto a promover: ${d.produto || '(nenhum — foco em atração/conteúdo)'}
+Duração: ${d.duracao}
+Objetivo: ${d.objetivo}
+Nicho/Tema: ${d.nicho}
+Situação real: ${d.situacao}
+Conhecimento insider: ${d.mecanismo}
+Momento de tensão: ${d.tensao}
+${d.produto ? `IMPORTANTE: Integre o produto "${d.produto}" de forma natural no roteiro — especialmente na Revelação do Mecanismo e no CTA, sem soar como propaganda forçada.` : ''}
+Retorne apenas o JSON.`,
+
+    storytelling: `Crie o roteiro com estes dados:
+Produto: ${d.produto}
+Duração alvo: ${d.duracao}
+Preço: ${d.preco}
+Problema que resolve: ${d.beneficio}
+Caso/Notícia para gancho: ${d.noticia || '(crie uma situação real compatível com o produto)'}
+Estatística: ${d.estatistica || '(gere uma estatística relevante baseada em dados conhecidos)'}
+Tom: ${d.tom}
+Ação do CTA: ${d.cta_acao}
+Retorne apenas o JSON.`,
+
+    ganchos: `Crie 5 ganchos com estes dados:
+Tema: ${d.tema}
+Nicho/Contexto: ${d.nicho}
+Objetivo: ${d.objetivo}
+Emoção alvo: ${d.emocao}
+Retorne apenas o JSON.`,
+
+    capas: `Crie 5 opções de capa com estes dados:
+Tema: ${d.tema}
+Nicho: ${d.nicho}
+Tipo de apelo: ${d.tipo}
+Plataforma: ${d.plataforma}
+Retorne apenas o JSON.`
+  };
+  return m[id] || '';
+}
+
+
+/* ===================== GENERATE ===================== */
+async function gerarConteudo() {
+  const apiKey = localStorage.getItem('cme_api_key');
+  if (!apiKey) {
+    alert('⚠️ Configure sua chave API primeiro!\n\nVá em ⚙️ Configurações → Chave da API Anthropic.');
+    return;
+  }
+
+  const dados = coletarDados();
+
+  // Remove error if exists
+  const errEl = document.getElementById('err-box');
+  if (errEl) errEl.remove();
+
+  // Disable button
+  const btn = document.getElementById('btn-gerar');
+  if (btn) btn.disabled = true;
+
+  // Show loading (transient — don't push to stack)
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-loading').classList.add('active');
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 2000,
+        system: getSystemPrompt(currentFeature),
+        messages: [{ role: 'user', content: getUserMessage(currentFeature, dados) }]
+      })
+    });
+
+    if (!res.ok) {
+      const e = await res.json().catch(() => ({}));
+      throw new Error(e.error?.message || `Erro ${res.status} — verifique sua API key.`);
+    }
+
+    const json = await res.json();
+    let text = json.content[0].text.trim();
+
+    // Strip markdown code blocks if present
+    text = text.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
+
+    const parsed = JSON.parse(text);
+    mostrarResultado(currentFeature, parsed);
+
+  } catch (err) {
+    // Re-enable button and show form with error
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-form').classList.add('active');
+    if (btn) btn.disabled = false;
+
+    const box = document.createElement('div');
+    box.id = 'err-box';
+    box.className = 'error-box';
+    box.textContent = '❌ ' + err.message;
+    document.getElementById('form-body').prepend(box);
+    window.scrollTo(0, 0);
+  }
+}
+
+
+/* ===================== RENDER RESULT ===================== */
+function mostrarResultado(id, data) {
+  let html = '';
+  let title = '';
+
+  if (id === 'magnetico') {
+    title = '🎬 Roteiro Magnético';
+    html = renderMagnetico(data);
+  } else if (id === 'storytelling') {
+    title = '📖 Roteiro Storytelling';
+    html = renderStorytelling(data);
+  } else if (id === 'ganchos') {
+    title = '🪝 Ganchos Gerados';
+    html = renderGanchos(data);
+  } else if (id === 'capas') {
+    title = '🖼️ Opções de Capa';
+    html = renderCapas(data);
+  }
+
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-body').innerHTML = html;
+  lastResultHTML = html;
+
+  // Navigate to result (back goes to form)
+  navigate('result');
+}
+
+/* ---- Notas decorativas ---- */
+function notesCol(color) {
+  return `<div class="r-block ${color}">
+    <span class="r-notes-label">Anotações</span>
+    <div class="r-notes-lines">
+      ${'<div class="r-notes-line"></div>'.repeat(8)}
+    </div>
+  </div>`;
+}
+
+/* ---- Roteiro Magnético ---- */
+function renderMagnetico(d) {
+  return `
+  <div class="roteiro-card">
+    <div class="roteiro-header">
+      <span class="roteiro-title-script">Roteiro de: <em>${(d.titulo||'').replace('Roteiro: ','').replace('Roteiro:','')}</em></span>
+      <div class="roteiro-meta">
+        <span class="roteiro-chip">⏱ ${d.duracao||''}</span>
+        <span class="roteiro-chip">🎯 ${(d.objetivo||'').split('—')[0].trim()}</span>
+        ${d.produto ? `<span class="roteiro-chip">🛍️ ${esc(d.produto)}</span>` : ''}
+      </div>
+    </div>
+
+    <!-- Seção ROSA -->
+    <div class="roteiro-section" style="margin-top:3px">
+      <div class="r-block pink">
+        <div class="r-subblock">
+          <span class="r-label">Abertura com tensão real</span>
+          <p class="r-text">${esc(d.abertura_tensao)}</p>
+        </div>
+        <div class="r-subblock" style="margin-top:12px">
+          <span class="r-label">Suspensão intencional</span>
+          <p class="r-text">${esc(d.suspensao_intencional)}</p>
+        </div>
+      </div>
+      ${notesCol('pink')}
+    </div>
+
+    <!-- Seção VERDE -->
+    <div class="roteiro-section" style="margin-top:3px">
+      <div class="r-block green">
+        <div class="r-subblock">
+          <span class="r-label">Contexto crível</span>
+          <p class="r-text">${esc(d.contexto_crivel)}</p>
+        </div>
+        <div class="r-subblock" style="margin-top:10px">
+          <span class="r-label">Revelação do mecanismo</span>
+          <p class="r-text">${esc(d.revelacao_mecanismo)}</p>
+        </div>
+        <div class="r-subblock" style="margin-top:10px">
+          <span class="r-label">Quebra meta-narrativa</span>
+          <p class="r-text">${esc(d.quebra_meta_narrativa)}</p>
+        </div>
+        <div class="r-subblock" style="margin-top:10px">
+          <span class="r-label">Regra prática</span>
+          <p class="r-text">${esc(d.regra_pratica)}</p>
+        </div>
+      </div>
+      ${notesCol('green')}
+    </div>
+
+    <!-- Seção TEAL -->
+    <div class="roteiro-section" style="margin-top:3px">
+      <div class="r-block teal">
+        <span class="r-label">CTA</span>
+        <p class="r-text">${esc(d.cta)}</p>
+      </div>
+      ${notesCol('teal')}
+    </div>
+
+    ${d.dicas_gravacao ? `
+    <div class="roteiro-dicas">
+      <div class="roteiro-dicas-title">💡 Dicas de gravação</div>
+      <div class="roteiro-dicas-text">${esc(d.dicas_gravacao)}</div>
+    </div>` : ''}
+  </div>`;
+}
+
+/* ---- Roteiro Storytelling ---- */
+function renderStorytelling(d) {
+  const historia = [d.ponte, d.virada, d.desenvolvimento].filter(Boolean).join('\n\n');
+  let extra = '';
+  if (d.gancho_alternativo) {
+    extra += `<div style="background:#F9F7FF;border-radius:12px;padding:14px 16px;margin-top:10px">
+      <div style="font-size:12px;font-weight:700;color:var(--primary);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">🔀 Gancho alternativo</div>
+      <p style="font-size:13px;line-height:1.65;color:var(--text)">${esc(d.gancho_alternativo)}</p>
+    </div>`;
+  }
+  if (d.legenda_sugerida) {
+    extra += `<div style="background:#F0FDF4;border-radius:12px;padding:14px 16px;margin-top:10px">
+      <div style="font-size:12px;font-weight:700;color:#059669;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">📝 Legenda sugerida</div>
+      <p style="font-size:13px;line-height:1.65;color:var(--text)">${esc(d.legenda_sugerida)}</p>
+    </div>`;
+  }
+
+  return `
+  <div class="roteiro-card">
+    <div class="roteiro-header">
+      <span class="roteiro-title-script">Roteiro de: <em>${(d.titulo||'').replace('Roteiro: ','').replace('Roteiro:','')}</em></span>
+      <div class="roteiro-meta">
+        ${d.duracao ? `<span class="roteiro-chip">⏱ ${esc(d.duracao)}</span>` : ''}
+        ${d.produto ? `<span class="roteiro-chip">🛍️ ${esc(d.produto)}</span>` : ''}
+      </div>
+    </div>
+
+    <!-- GANCHO (rosa) -->
+    <div class="roteiro-section" style="margin-top:3px">
+      <div class="r-block pink">
+        <span class="r-label">Gancho</span>
+        <p class="r-text">${esc(d.gancho)}</p>
+      </div>
+      ${notesCol('pink')}
+    </div>
+
+    <!-- HISTÓRIA (verde) -->
+    <div class="roteiro-section" style="margin-top:3px">
+      <div class="r-block green">
+        <span class="r-label">História</span>
+        <p class="r-text">${esc(historia)}</p>
+      </div>
+      ${notesCol('green')}
+    </div>
+
+    <!-- CTA (teal) -->
+    <div class="roteiro-section" style="margin-top:3px">
+      <div class="r-block teal">
+        <span class="r-label">CTA</span>
+        <p class="r-text">${esc(d.cta)}</p>
+      </div>
+      ${notesCol('teal')}
+    </div>
+  </div>
+  ${extra}`;
+}
+
+/* ---- Ganchos ---- */
+function renderGanchos(d) {
+  if (!d.ganchos || !Array.isArray(d.ganchos)) return '<p>Erro ao gerar ganchos.</p>';
+  const COLORS = ['#8B5CF6','#EC4899','#F59E0B','#10B981','#3B82F6'];
+  let html = '<div class="ganchos-list">';
+  d.ganchos.forEach((g, i) => {
+    html += `<div class="gancho-card" style="border-left-color:${COLORS[i]||'#8B5CF6'}">
+      <div class="gancho-tipo" style="color:${COLORS[i]||'#8B5CF6'}">${i+1}. ${esc(g.tipo)}</div>
+      <div class="gancho-texto">${esc(g.texto)}</div>
+    </div>`;
+  });
+  html += '</div>';
+  return html;
+}
+
+/* ---- Capas ---- */
+function renderCapas(d) {
+  if (!d.opcoes || !Array.isArray(d.opcoes)) return '<p>Erro ao gerar capas.</p>';
+  let html = '';
+  if (d.dica) {
+    html += `<div class="capas-dica">💡 <strong>Dica de design:</strong> ${esc(d.dica)}</div>`;
+  }
+  html += '<div class="capas-card">';
+  d.opcoes.forEach(o => {
+    html += `<div class="capa-item">
+      <div class="capa-header">
+        <div class="capa-num">${o.numero}</div>
+        <div class="capa-tipo-badge">${esc(o.tipo)}</div>
+      </div>
+      <div class="capa-titulo">${esc(o.titulo)}</div>
+      <div class="capa-sub">${esc(o.subtitulo)}</div>
+    </div>`;
+  });
+  html += '</div>';
+  return html;
+}
+
+/* ---- Escape HTML ---- */
+function esc(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/\n/g,'<br>');
+}
+
+
+/* ===================== PDF DOWNLOAD ===================== */
+function downloadPDF() {
+  // Build print area
+  const printArea = document.getElementById('print-area');
+  const titleEl = document.getElementById('result-title');
+
+  printArea.innerHTML = `
+    <div style="font-family:'Nunito',sans-serif; padding:8px 0 20px;">
+      <h2 style="font-size:18px; font-weight:800; color:#1F2937; margin-bottom:16px;">
+        ${titleEl ? titleEl.textContent : 'Conteúdo CME'}
+      </h2>
+      ${lastResultHTML}
+    </div>`;
+
+  // Hide screens, show print area
+  document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+  printArea.style.display = 'block';
+
+  window.print();
+
+  // Restore after print
+  setTimeout(() => {
+    printArea.style.display = 'none';
+    printArea.innerHTML = '';
+    document.querySelectorAll('.screen').forEach(s => s.style.display = '');
+    document.getElementById('screen-result').style.display = 'flex';
+  }, 1000);
+}
+
+
+/* ===================== SETTINGS ===================== */
+function saveApiKey() {
+  const key = document.getElementById('api-key-input').value.trim();
+  if (!key) { alert('Cole uma chave API válida!'); return; }
+  if (!key.startsWith('sk-ant-')) { alert('⚠️ A chave deve começar com "sk-ant-"'); return; }
+  localStorage.setItem('cme_api_key', key);
+  document.getElementById('api-key-input').value = '';
+  updateApiStatus();
+  alert('✅ Chave salva com sucesso!\n\nAgora você pode gerar conteúdo. 🎉');
+}
+
+function clearData() {
+  if (confirm('Apagar a chave API salva?')) {
+    localStorage.removeItem('cme_api_key');
+    updateApiStatus();
+    alert('Chave apagada.');
+  }
+}
+
+function updateApiStatus() {
+  const statusEl = document.getElementById('api-key-status');
+  if (!statusEl) return;
+  const key = localStorage.getItem('cme_api_key');
+  if (key) {
+    statusEl.innerHTML = `<div class="api-saved">✅ Chave configurada — ${key.slice(0,12)}...</div>`;
+  } else {
+    statusEl.innerHTML = '';
+  }
+}
+
+// Init settings status when entering settings screen
+const origNavigate = navigate;
+document.querySelector('[onclick="navigate(\'settings\')"]')?.addEventListener('click', updateApiStatus);
+
+// Also update on DOM ready
+document.addEventListener('DOMContentLoaded', () => {
+  // Check if API key is set and show a subtle indicator on home
+  const key = localStorage.getItem('cme_api_key');
+  if (!key) {
+    // Show setup prompt
+    const hint = document.createElement('div');
+    hint.style.cssText = 'background:#FEF3C7;border-radius:12px;padding:10px 14px;font-size:12px;color:#92400E;margin-top:4px;margin-bottom:16px;cursor:pointer';
+    hint.textContent = '⚙️ Configure sua API Key para começar a gerar conteúdo →';
+    hint.onclick = () => navigate('settings');
+    const homeBody = document.querySelector('.home-body');
+    if (homeBody) homeBody.insertBefore(hint, homeBody.querySelector('.section-label'));
+  }
+});
+
+// Settings: update status when screen becomes visible
+const settingsScreen = document.getElementById('screen-settings');
+const observer = new MutationObserver(() => {
+  if (settingsScreen.classList.contains('active')) updateApiStatus();
+});
+observer.observe(settingsScreen, { attributes: true, attributeFilter: ['class'] });
+
+/* ===================== SERVICE WORKER ===================== */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+
+</script>
+</body>
+</html>
